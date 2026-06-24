@@ -1,0 +1,51 @@
+produit_id,nom_produit,categorie,sous_categorie,prix_unitaire_xaf,stock_initial,fournisseur,pays_origine
+P001,Smartphone Samsung Galaxy A14,Téléphonie,Smartphones,85000,150,Samsung Electronics,Corée du Sud
+P002,Smartphone Tecno Spark 10,Téléphonie,Smartphones,65000,200,Tecno Mobile,Chine
+P003,Smartphone Infinix Hot 30,Téléphonie,Smartphones,55000,180,Infinix,Chine
+P004,Téléphone portable Itel A60,Téléphonie,Téléphones basiques,25000,300,Itel Mobile,Chine
+P005,Smartphone iPhone 13 reconditionné,Téléphonie,Smartphones,250000,30,Apple,États-Unis
+P006,Ordinateur portable HP 15,Électronique,Ordinateurs,450000,40,HP,Chine
+P007,Ordinateur portable Lenovo IdeaPad,Électronique,Ordinateurs,380000,35,Lenovo,Chine
+P008,Tablette Samsung Tab A8,Électronique,Tablettes,180000,60,Samsung Electronics,Corée du Sud
+P009,Télévision LG 43 pouces,Électronique,Télévisions,320000,25,LG Electronics,Corée du Sud
+P010,Télévision TCL 32 pouces,Électronique,Télévisions,185000,40,TCL,Chine
+P011,Réfrigérateur Hisense 200L,Électroménager,Réfrigération,380000,20,Hisense,Chine
+P012,Ventilateur de table Brandt,Électroménager,Climatisation,35000,100,Brandt,France
+P013,Climatiseur split 12000 BTU,Électroménager,Climatisation,450000,15,Midea,Chine
+P014,Machine à laver Haier 7kg,Électroménager,Lavage,420000,18,Haier,Chine
+P015,Fer à repasser Philips,Électroménager,Repassage,28000,80,Philips,Pays-Bas
+P016,Sac de riz parfumé 25kg,Alimentation,Céréales,22500,500,Rizeries du Congo,Congo
+P017,Huile de palme 5L,Alimentation,Huiles,8500,400,Huilerie Pointe-Noire,Congo
+P018,Sucre blanc 5kg,Alimentation,Sucre,5500,600,SARIS Congo,Congo
+P019,Farine de blé 50kg,Alimentation,Farines,38000,200,MINOCO,Congo
+P020,Lait en poudre Nestlé 2.5kg,Alimentation,Produits laitiers,35000,150,Nestlé,Suisse
+P021,Tomates en conserve 400g,Alimentation,Conserves,1500,800,Import Maghreb,Maroc
+P022,Sardines en boîte 200g,Alimentation,Conserves,1800,700,Saupiquet,France
+P023,Café Nescafé 200g,Alimentation,Boissons,8500,300,Nestlé,Suisse
+P024,Eau minérale Supermont 1.5L,Alimentation,Boissons,800,1000,Supermont Congo,Congo
+P025,Bière Ngok 65cl,Alimentation,Boissons alcoolisées,1500,600,SCBK,Congo
+P026,Chemise homme coton,Textile,Vêtements hommes,18000,120,Manufacture Textile,Maroc
+P027,Robe femme wax africain,Textile,Vêtements femmes,25000,100,Tissu Mode Africa,Congo
+P028,Pantalon jean homme,Textile,Vêtements hommes,22000,150,Import Mode,Turquie
+P029,Pagne wax 6 yards,Textile,Tissu,15000,200,SOTEXCO,Congo
+P030,Chaussures homme cuir,Textile,Chaussures,45000,80,Manufacture Pied,Maroc
+P031,Chaussures femme sandale,Textile,Chaussures,28000,100,Import Chine,Chine
+P032,T-shirt coton adulte,Textile,Vêtements hommes,8000,250,Import Textile,Bangladesh
+P033,Robe enfant 3-12 ans,Textile,Vêtements enfants,12000,150,Mode Enfantine,Congo
+P034,Moustiquaire imprégnée,Santé & Hygiène,Protection,8500,300,SSMI Congo,Congo
+P035,Savon de Marseille 400g,Santé & Hygiène,Hygiène,2500,500,Savonnerie Brazzaville,Congo
+P036,Shampoing Pantene 400ml,Santé & Hygiène,Cosmétiques,7500,200,P&G,États-Unis
+P037,Crème nivea 200ml,Santé & Hygiène,Cosmétiques,5500,250,Beiersdorf,Allemagne
+P038,Dentifrice Colgate 75ml,Santé & Hygiène,Hygiène dentaire,2500,400,Colgate,États-Unis
+P039,Cahier 100 pages grand format,Papeterie,Fournitures scolaires,1500,600,Papeterie Congo,Congo
+P040,Stylo bille BIC (lot 10),Papeterie,Fournitures scolaires,3500,400,BIC,France
+P041,Cartable enfant primaire,Papeterie,Fournitures scolaires,18000,100,Import Scolaire,Chine
+P042,Calculatrice scientifique Casio,Papeterie,Matériel scolaire,22000,80,Casio,Japon
+P043,Peinture intérieure 20L,Bâtiment,Peinture,65000,60,CICAM,Cameroun
+P044,Ciment 50kg,Bâtiment,Matériaux,15000,200,SOCEM,Congo
+P045,Tôle galvanisée 3m,Bâtiment,Matériaux,25000,100,Import Matériaux,Chine
+P046,Cable électrique 2.5mm 100m,Bâtiment,Électricité,85000,50,Cablelec,France
+P047,Interrupteur va-et-vient,Bâtiment,Électricité,3500,300,Schneider Electric,France
+P048,Groupe électrogène 2.5KVA,Électronique,Énergie,850000,10,Kipor,Chine
+P049,Panneau solaire 250W,Électronique,Énergie,185000,25,Canadian Solar,Canada
+P050,Chargeur téléphone universel,Téléphonie,Accessoires,5000,500,Import Accessoires,Chine

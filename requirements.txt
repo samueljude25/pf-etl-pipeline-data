@@ -1,0 +1,57 @@
+# ============================================================
+# Dépendances Python — Pipeline ETL Commerce Congo
+# Installation : pip install -r requirements.txt
+# Python >= 3.10 requis
+# ============================================================
+
+# ─── Traitement des données ──────────────────────────────────────────────────
+pandas>=2.0.0
+numpy>=1.24.0
+pyarrow>=12.0.0            # Format Parquet pour les fichiers intermédiaires
+openpyxl>=3.1.0            # Export Excel (rapports)
+
+# ─── Base de données ─────────────────────────────────────────────────────────
+sqlalchemy>=2.0.0          # ORM et abstraction base de données
+psycopg2-binary>=2.9.0     # Driver PostgreSQL
+alembic>=1.11.0            # Migrations de schéma
+
+# ─── API et HTTP ─────────────────────────────────────────────────────────────
+requests>=2.31.0           # Appels HTTP vers les APIs
+urllib3>=2.0.0
+
+# ─── Configuration et environnement ─────────────────────────────────────────
+pyyaml>=6.0                # Lecture du fichier config.yaml
+python-dotenv>=1.0.0       # Chargement des variables .env
+pydantic>=2.0.0            # Validation de la configuration
+
+# ─── Génération de données fictives ─────────────────────────────────────────
+faker>=19.0.0              # Génération de données fictives réalistes
+
+# ─── Logging et monitoring ───────────────────────────────────────────────────
+loguru>=0.7.0              # Logging avancé (optionnel, logger.py utilise stdlib)
+
+# ─── Apache Airflow ──────────────────────────────────────────────────────────
+# Note : Airflow est géré via Docker (voir docker-compose.yml)
+# Pour une installation locale uniquement :
+# apache-airflow==2.8.0
+# apache-airflow-providers-postgres>=5.0.0
+
+# ─── dbt ─────────────────────────────────────────────────────────────────────
+dbt-core>=1.7.0
+dbt-postgres>=1.7.0
+
+# ─── Qualité du code ─────────────────────────────────────────────────────────
+black>=23.0.0              # Formatage du code
+flake8>=6.0.0              # Linting
+isort>=5.12.0              # Tri des imports
+mypy>=1.4.0                # Vérification de types
+
+# ─── Tests ───────────────────────────────────────────────────────────────────
+pytest>=7.4.0
+pytest-cov>=4.1.0          # Couverture de tests
+great-expectations>=0.17.0 # Tests de qualité des données (optionnel)
+
+# ─── Visualisation (optionnel, pour notebooks d'exploration) ─────────────────
+# matplotlib>=3.7.0
+# seaborn>=0.12.0
+# jupyter>=1.0.0

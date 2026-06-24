@@ -1,0 +1,151 @@
+# ============================================================
+# Configuration du Pipeline ETL Commerce Congo
+# Fichier : config/config.yaml
+# Utilisation : charger avec PyYAML → yaml.safe_load(open('config/config.yaml'))
+# ============================================================
+
+# ─── Environnement ──────────────────────────────────────────────────────────
+environnement: "dev"  # dev | staging | prod
+
+projet:
+  nom: "Pipeline ETL Commerce Congo"
+  auteur: "Samuel Jude SENDZI"
+  version: "1.0.0"
+  description: >
+    Pipeline de centralisation des données commerciales multi-sources
+    pour une entreprise commerciale en Afrique centrale (Congo-Brazzaville).
+  devise: "XAF"
+  pays: "Congo-Brazzaville"
+  langue: "fr"
+
+
+# ─── Chemins des données ─────────────────────────────────────────────────────
+chemins:
+  dossier_raw: "data/raw"
+  dossier_processed: "data/processed"
+  dossier_logs: "logs"
+  dossier_temp: "/tmp"
+
+  fichiers_csv:
+    clients: "data/raw/clients.csv"
+    transactions: "data/raw/transactions.csv"
+    produits: "data/raw/produits.csv"
+    magasins: "data/raw/magasins.csv"
+
+
+# ─── Connexions aux bases de données ─────────────────────────────────────────
+bases_de_donnees:
+  # Entrepôt analytique (destination)
+  entrepot:
+    type: "postgresql"
+    host: "${DB_HOST:localhost}"
+    port: 5432
+    nom: "${DB_NAME:entrepot_commerce}"
+    utilisateur: "${DB_USER:etl_user}"
+    mot_de_passe: "${DB_PASSWORD}"     # Toujours via variable d'environnement
+    schema_staging: "staging"
+    schema_marts: "marts"
+    pool_connexions: 5
+    timeout_secondes: 30
+
+  # Base source (système ERP/POS existant)
+  source_erp:
+    type: "postgresql"
+    host: "${SOURCE_DB_HOST:localhost}"
+    port: 5432
+    nom: "${SOURCE_DB_NAME:erp_commerce}"
+    utilisateur: "${SOURCE_DB_USER:readonly_user}"
+    mot_de_passe: "${SOURCE_DB_PASSWORD}"
+    schema: "public"
+    pool_connexions: 2
+    timeout_secondes: 60
+
+
+# ─── Paramètres du pipeline ETL ──────────────────────────────────────────────
+pipeline:
+  # Fenêtre de traitement (données à extraire)
+  date_debut: "2024-01-01"
+  date_fin: "2025-12-31"
+
+  # Traitement par lots
+  taille_lot: 1000                    # Lignes par lot pour les insertions
+  nb_workers_paralleles: 4            # Threads pour l'extraction parallèle
+
+  # Rétention des logs
+  retention_logs_jours: 90
+
+  # Stratégie de chargement
+  strategie_chargement: "replace"     # replace | append | upsert
+
+
+# ─── Validation et qualité des données ───────────────────────────────────────
+qualite:
+  montants:
+    minimum_xaf: 500
+    maximum_xaf: 5_000_000
+    devise_attendue: "XAF"
+
+  completude:
+    seuil_alerte_pct: 95.0           # Taux de complétude minimum (%)
+    colonnes_critiques:
+      - "client_id"
+      - "transaction_id"
+      - "montant_total_xaf"
+      - "date_transaction"
+
+  doublons:
+    seuil_alerte_pct: 1.0            # Taux de doublons maximum toléré (%)
+
+  anomalies:
+    methode: "iqr"                   # iqr | zscore
+    zscore_seuil: 3.0
+    iqr_multiplicateur: 1.5
+
+  volume:
+    transactions_min_par_jour: 1     # Alerte si moins de N transactions/jour
+
+
+# ─── API externe ─────────────────────────────────────────────────────────────
+api:
+  base_url: "https://api.commerce-congo.cg/v1"  # URL fictive (simulation)
+  timeout_secondes: 30
+  max_tentatives: 3
+  delai_entre_tentatives_secondes: 5
+  cle_api: "${API_KEY:}"                         # Via variable d'environnement
+
+
+# ─── Logging ────────────────────────────────────────────────────────────────
+logging:
+  niveau: "INFO"                      # DEBUG | INFO | WARNING | ERROR
+  format: "%(asctime)s | %(levelname)-8s | %(name)-25s | %(message)s"
+  fichier_rotation_mo: 10             # Rotation à 10 Mo
+  nb_fichiers_archives: 5
+
+  # Alertes par email en cas d'erreur critique
+  alertes_email:
+    actives: false                    # Mettre true en production
+    destinataires:
+      - "samuel.sendzi@email.com"
+    expediteur: "${SMTP_FROM:pipeline@commerce-congo.cg}"
+    serveur_smtp: "${SMTP_HOST:localhost}"
+    port_smtp: 587
+
+
+# ─── dbt ────────────────────────────────────────────────────────────────────
+dbt:
+  profil: "entrepot_commerce_congo"
+  cible: "dev"
+  threads: 4
+  repertoire_modeles: "dbt/models"
+  repertoire_target: "dbt/target"
+
+
+# ─── Airflow ─────────────────────────────────────────────────────────────────
+airflow:
+  owner: "samuel.sendzi"
+  dag_etl: "pipeline_etl_commerce_congo"
+  dag_qualite: "controle_qualite_donnees"
+  schedule_etl: "@daily"
+  schedule_qualite: "0 6 * * *"
+  retries: 2
+  retry_delay_minutes: 5

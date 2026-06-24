@@ -1,0 +1,44 @@
+name: 'pipeline_etl_congo'
+version: '1.0.0'
+config-version: 2
+
+# Profil de connexion (défini dans profiles.yml)
+profile: 'entrepot_commerce_congo'
+
+# Chemins du projet
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+# Répertoire de compilation
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+# Configuration des modèles
+models:
+  pipeline_etl_congo:
+    # Couche staging : vues légères, pas de matérialisation coûteuse
+    staging:
+      +materialized: view
+      +schema: staging
+      +tags: ["staging", "quotidien"]
+
+    # Couche marts : tables matérialisées pour les performances analytiques
+    marts:
+      +materialized: table
+      +schema: marts
+      +tags: ["marts", "analytique"]
+
+# Variables globales du projet
+vars:
+  date_debut_donnees: '2024-01-01'
+  date_fin_donnees: '2025-12-31'
+  devise_principale: 'XAF'
+  pays: 'Congo-Brazzaville'
+  montant_min_valide: 500
+  montant_max_valide: 5000000

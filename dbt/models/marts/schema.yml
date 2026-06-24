@@ -1,0 +1,81 @@
+version: 2
+
+models:
+  - name: mart_ventes
+    description: >
+      Table de faits agrégée au grain mensuel × magasin × catégorie produit.
+      Principale source pour le tableau de bord commercial.
+    columns:
+      - name: mois_annee
+        description: "Période au format YYYY-MM"
+        tests:
+          - not_null
+      - name: magasin_id
+        description: "Identifiant du magasin"
+        tests:
+          - not_null
+      - name: ca_total_xaf
+        description: "Chiffre d'affaires total en XAF pour la période et le magasin"
+        tests:
+          - not_null
+      - name: nb_transactions
+        description: "Nombre de transactions sur la période"
+        tests:
+          - not_null
+      - name: panier_moyen_xaf
+        description: "Montant moyen par transaction en XAF"
+
+  - name: mart_clients
+    description: >
+      Dimension clients enrichie avec métriques comportementales RFM.
+      Un enregistrement par client, avec son historique complet d'achats.
+    columns:
+      - name: client_id
+        description: "Identifiant unique du client"
+        tests:
+          - not_null
+          - unique
+      - name: ca_total_xaf
+        description: "Chiffre d'affaires total généré par le client"
+        tests:
+          - not_null
+      - name: segment_rfm
+        description: "Segment comportemental du client (RFM)"
+        tests:
+          - not_null
+          - accepted_values:
+              values:
+                - 'Champions'
+                - 'Clients fidèles'
+                - 'Clients à risque'
+                - 'Clients inactifs'
+                - 'Clients en développement'
+                - 'Jamais acheté'
+      - name: score_rfm_moyen
+        description: "Score RFM moyen (1-5, 5 = meilleur)"
+
+  - name: mart_produits
+    description: >
+      Performance commerciale de chaque produit sur l'ensemble de la période.
+      Intègre le rang CA, la part de marché et les indicateurs canal.
+    columns:
+      - name: produit_id
+        description: "Identifiant unique du produit"
+        tests:
+          - not_null
+          - unique
+      - name: ca_total_xaf
+        description: "CA total généré par le produit"
+        tests:
+          - not_null
+      - name: rang_ca
+        description: "Rang du produit selon son CA (1 = meilleur)"
+      - name: categorie_performance
+        description: "Catégorie de performance du produit"
+        tests:
+          - accepted_values:
+              values:
+                - 'Top 10 CA'
+                - 'Produit clé'
+                - 'Produit standard'
+                - 'Aucune vente'

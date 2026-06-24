@@ -1,0 +1,11 @@
+magasin_id,nom_magasin,ville,quartier,adresse,responsable,telephone,surface_m2,date_ouverture,statut
+M001,Supérette Centrale Bacongo,Brazzaville,Bacongo,Avenue des Trois Martyrs,MOUKALA Dieudonné,+242 06 100 1001,450,2020-03-15,Actif
+M002,Grand Marché Poto-Poto,Brazzaville,Poto-Poto,Rue Éboué Noire,NGOMA Alphonse,+242 06 100 1002,620,2019-06-01,Actif
+M003,Boutique Moungali Plus,Brazzaville,Moungali,Boulevard Denis Sassou,MABIKA Colette,+242 06 100 1003,280,2021-01-10,Actif
+M004,Centre Commercial Talangaï,Brazzaville,Talangaï,Rue de la Paix,LOEMBA Gérard,+242 06 100 1004,800,2018-09-20,Actif
+M005,Épicerie Ouenzé Service,Brazzaville,Ouenzé,Avenue Kasa-Vubu,NKODIA Pauline,+242 06 100 1005,320,2022-04-05,Actif
+M006,Maxi Shop Lumumba,Pointe-Noire,Lumumba,Avenue du Port,BOUANGA Jean,+242 05 200 2001,550,2019-11-12,Actif
+M007,Supermarché Mvou-Mvou,Pointe-Noire,Mvou-Mvou,Rue Loango,PAMBOU Sylvie,+242 05 200 2002,480,2020-08-03,Actif
+M008,Boutique Tié-Tié Express,Pointe-Noire,Tié-Tié,Boulevard de la Corniche,MALONGA Roger,+242 05 200 2003,200,2023-02-14,Actif
+M009,Commerce Dolisie Centre,Dolisie,Centre-Ville,Place de l'Indépendance,NKEOUA Marcelline,+242 04 300 3001,360,2021-07-22,Actif
+M010,Marché Ouesso Nord,Ouesso,Centre,Rue de la Sangha,DJOMBO Théodore,+242 04 400 4001,250,2022-10-30,Actif

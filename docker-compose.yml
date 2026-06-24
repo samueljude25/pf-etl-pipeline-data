@@ -1,0 +1,219 @@
+# ============================================================
+# Docker Compose — Pipeline ETL Commerce Congo
+# Services : PostgreSQL, Airflow (webserver + scheduler), pgAdmin
+# Usage : docker-compose up -d
+# Auteur : Samuel Jude SENDZI
+# ============================================================
+
+version: '3.8'
+
+# ─── Réseau commun ──────────────────────────────────────────────────────────
+networks:
+  etl_network:
+    driver: bridge
+    name: etl_commerce_congo
+
+# ─── Volumes persistants ────────────────────────────────────────────────────
+volumes:
+  postgres_entrepot_data:
+    name: etl_postgres_entrepot
+  postgres_airflow_data:
+    name: etl_postgres_airflow
+  pgadmin_data:
+    name: etl_pgadmin
+  airflow_logs:
+    name: etl_airflow_logs
+
+
+services:
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # PostgreSQL — Entrepôt de données analytique
+  # ─────────────────────────────────────────────────────────────────────────
+  postgres-entrepot:
+    image: postgres:15-alpine
+    container_name: etl_postgres_entrepot
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: entrepot_commerce
+      POSTGRES_USER: etl_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-etl_password_dev}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=fr_FR.UTF-8"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_entrepot_data:/var/lib/postgresql/data
+      # Exécution automatique du schéma à la première initialisation
+      - ./sql/warehouse_schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+    networks:
+      - etl_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U etl_user -d entrepot_commerce"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command:
+      - "postgres"
+      - "-c"
+      - "max_connections=100"
+      - "-c"
+      - "shared_buffers=256MB"
+      - "-c"
+      - "log_statement=none"
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # PostgreSQL — Base de données interne Airflow
+  # ─────────────────────────────────────────────────────────────────────────
+  postgres-airflow:
+    image: postgres:15-alpine
+    container_name: etl_postgres_airflow
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: airflow
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+    volumes:
+      - postgres_airflow_data:/var/lib/postgresql/data
+    networks:
+      - etl_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U airflow -d airflow"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # Apache Airflow — Webserver (interface graphique)
+  # ─────────────────────────────────────────────────────────────────────────
+  airflow-webserver:
+    image: apache/airflow:2.8.0-python3.11
+    container_name: etl_airflow_webserver
+    restart: unless-stopped
+    depends_on:
+      postgres-airflow:
+        condition: service_healthy
+    environment:
+      # Connexion à la base Airflow
+      AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres-airflow:5432/airflow
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__CORE__LOAD_EXAMPLES: "False"
+      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "True"
+      AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW__WEBSERVER__SECRET_KEY:-cle_secrete_locale}
+      AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "True"
+      # Connexion à l'entrepôt (disponible dans les DAGs)
+      WAREHOUSE_DB_URL: postgresql+psycopg2://etl_user:${DB_PASSWORD:-etl_password_dev}@postgres-entrepot:5432/entrepot_commerce
+      PYTHONPATH: /opt/airflow
+      # Alertes email
+      AIRFLOW_EMAIL_ALERT: ${AIRFLOW_EMAIL_ALERT:-alertes@commerce-congo.cg}
+    ports:
+      - "8080:8080"
+    volumes:
+      # Montage des DAGs depuis le répertoire local
+      - ./airflow/dags:/opt/airflow/dags
+      # Code source du pipeline monté pour les imports
+      - ./src:/opt/airflow/src:ro
+      - ./config:/opt/airflow/config:ro
+      - ./data:/opt/airflow/data:ro
+      - airflow_logs:/opt/airflow/logs
+    networks:
+      - etl_network
+    command: webserver
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # Apache Airflow — Scheduler (exécution des DAGs)
+  # ─────────────────────────────────────────────────────────────────────────
+  airflow-scheduler:
+    image: apache/airflow:2.8.0-python3.11
+    container_name: etl_airflow_scheduler
+    restart: unless-stopped
+    depends_on:
+      postgres-airflow:
+        condition: service_healthy
+      airflow-webserver:
+        condition: service_healthy
+    environment:
+      AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres-airflow:5432/airflow
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__CORE__LOAD_EXAMPLES: "False"
+      WAREHOUSE_DB_URL: postgresql+psycopg2://etl_user:${DB_PASSWORD:-etl_password_dev}@postgres-entrepot:5432/entrepot_commerce
+      PYTHONPATH: /opt/airflow
+      AIRFLOW_EMAIL_ALERT: ${AIRFLOW_EMAIL_ALERT:-alertes@commerce-congo.cg}
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./src:/opt/airflow/src:ro
+      - ./config:/opt/airflow/config:ro
+      - ./data:/opt/airflow/data:ro
+      - airflow_logs:/opt/airflow/logs
+    networks:
+      - etl_network
+    command: scheduler
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # Airflow Init — Initialisation de la base de données Airflow
+  # S'exécute une seule fois au démarrage
+  # ─────────────────────────────────────────────────────────────────────────
+  airflow-init:
+    image: apache/airflow:2.8.0-python3.11
+    container_name: etl_airflow_init
+    depends_on:
+      postgres-airflow:
+        condition: service_healthy
+    environment:
+      AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres-airflow:5432/airflow
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      _AIRFLOW_DB_UPGRADE: "true"
+      _AIRFLOW_WWW_USER_CREATE: "true"
+      _AIRFLOW_WWW_USER_USERNAME: ${AIRFLOW_ADMIN_USER:-admin}
+      _AIRFLOW_WWW_USER_PASSWORD: ${AIRFLOW_ADMIN_PASSWORD:-admin123}
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+    networks:
+      - etl_network
+    command: >
+      bash -c "
+        airflow db init &&
+        airflow users create
+          --username $${_AIRFLOW_WWW_USER_USERNAME}
+          --firstname Samuel
+          --lastname Sendzi
+          --role Admin
+          --email admin@commerce-congo.cg
+          --password $${_AIRFLOW_WWW_USER_PASSWORD}
+      "
+    restart: on-failure
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # pgAdmin — Interface d'administration PostgreSQL
+  # ─────────────────────────────────────────────────────────────────────────
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: etl_pgadmin
+    restart: unless-stopped
+    depends_on:
+      postgres-entrepot:
+        condition: service_healthy
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@commerce-congo.cg}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-pgadmin_password}
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - etl_network
+
+# ─────────────────────────────────────────────────────────────────────────────
+# RÉSUMÉ DES ACCÈS
+# ─────────────────────────────────────────────────────────────────────────────
+# Airflow UI      : http://localhost:8080  (admin / admin123)
+# pgAdmin         : http://localhost:5050  (admin@commerce-congo.cg / pgadmin_password)
+# PostgreSQL      : localhost:5432         (etl_user / etl_password_dev)
+# ─────────────────────────────────────────────────────────────────────────────

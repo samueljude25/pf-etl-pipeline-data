@@ -1,0 +1,28 @@
+entrepot_commerce_congo:
+  target: dev
+  outputs:
+    # Environnement de développement local
+    dev:
+      type: postgres
+      host: localhost
+      user: etl_user
+      password: "{{ env_var('DBT_PASSWORD', 'motdepasse_dev') }}"
+      port: 5432
+      dbname: entrepot_commerce
+      schema: staging
+      threads: 4
+      keepalives_idle: 0
+      connect_timeout: 10
+
+    # Environnement de production
+    prod:
+      type: postgres
+      host: "{{ env_var('DB_HOST', 'localhost') }}"
+      user: "{{ env_var('DB_USER', 'etl_user') }}"
+      password: "{{ env_var('DB_PASSWORD') }}"
+      port: "{{ env_var('DB_PORT', '5432') | int }}"
+      dbname: "{{ env_var('DB_NAME', 'entrepot_commerce') }}"
+      schema: staging
+      threads: 8
+      keepalives_idle: 0
+      connect_timeout: 30

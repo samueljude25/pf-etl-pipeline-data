@@ -1,0 +1,126 @@
+version: 2
+
+sources:
+  - name: staging
+    description: "Tables brutes chargées par le pipeline ETL Python"
+    schema: staging
+    tables:
+      - name: clients
+        description: "Données clients issues du fichier clients.csv"
+      - name: transactions
+        description: "Transactions commerciales issues du fichier transactions.csv"
+      - name: produits
+        description: "Référentiel produits issu du fichier produits.csv"
+      - name: magasins
+        description: "Référentiel des magasins issu du fichier magasins.csv"
+
+models:
+  - name: stg_clients
+    description: >
+      Clients nettoyés, normalisés et enrichis depuis la source CSV.
+      Un enregistrement par client unique (déduplication sur client_id).
+    columns:
+      - name: client_id
+        description: "Identifiant unique du client (ex: C001)"
+        tests:
+          - not_null
+          - unique
+      - name: nom
+        description: "Nom de famille en majuscules"
+        tests:
+          - not_null
+      - name: email
+        description: "Adresse email normalisée en minuscules"
+        tests:
+          - not_null
+      - name: ville
+        description: "Ville de résidence du client"
+        tests:
+          - not_null
+          - accepted_values:
+              values:
+                - 'Brazzaville'
+                - 'Pointe-Noire'
+                - 'Dolisie'
+                - 'Ouesso'
+                - 'Nkayi'
+                - 'Impfondo'
+      - name: categorie_client
+        description: "Segment de fidélité du client"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Standard', 'Premium', 'VIP']
+      - name: sexe
+        description: "Genre du client (M ou F)"
+        tests:
+          - accepted_values:
+              values: ['M', 'F', 'Inconnu']
+
+  - name: stg_transactions
+    description: >
+      Transactions commerciales nettoyées et enrichies.
+      Exclut les transactions annulées et les montants hors plage.
+    columns:
+      - name: transaction_id
+        description: "Identifiant unique de la transaction (ex: T0001)"
+        tests:
+          - not_null
+          - unique
+      - name: client_id
+        description: "Référence au client"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_clients')
+              field: client_id
+      - name: montant_total_xaf
+        description: "Montant total en Francs CFA (XAF)"
+        tests:
+          - not_null
+      - name: statut_transaction
+        description: "Statut de la transaction"
+        tests:
+          - accepted_values:
+              values: ['Validé', 'En attente', 'Remboursé']
+      - name: mode_paiement
+        description: "Mode de règlement utilisé"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Espèces', 'Mobile Money', 'Carte bancaire', 'Virement']
+
+  - name: stg_produits
+    description: "Référentiel produits nettoyé et enrichi"
+    columns:
+      - name: produit_id
+        description: "Identifiant unique du produit (ex: P001)"
+        tests:
+          - not_null
+          - unique
+      - name: categorie
+        description: "Catégorie principale du produit"
+        tests:
+          - not_null
+      - name: prix_unitaire_xaf
+        description: "Prix unitaire de vente en XAF"
+        tests:
+          - not_null
+
+  - name: stg_magasins
+    description: "Référentiel des magasins actifs nettoyé et enrichi"
+    columns:
+      - name: magasin_id
+        description: "Identifiant unique du magasin (ex: M001)"
+        tests:
+          - not_null
+          - unique
+      - name: ville
+        description: "Ville du magasin"
+        tests:
+          - not_null
+      - name: statut
+        description: "Statut opérationnel du magasin"
+        tests:
+          - accepted_values:
+              values: ['Actif']
